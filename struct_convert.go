@@ -5,6 +5,10 @@ import (
 	"github.com/fatih/structs"
 )
 
+func init() {
+	structs.DefaultTagName = "json"
+}
+
 func Map2Struct(m map[string]interface{}, s interface{}) error {
 	// TODO refactor to more smart method :)
 	data, err := json.Marshal(m)

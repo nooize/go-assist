@@ -3,6 +3,7 @@ package assist
 import (
 	"net"
 	"net/http"
+	"net/url"
 )
 
 func HttpRequestIP(r *http.Request) net.IP {
@@ -14,4 +15,8 @@ func HttpRequestIP(r *http.Request) net.IP {
 		ip = r.RemoteAddr
 	}
 	return net.ParseIP(ip)
+}
+
+func IsUrlOk(url *url.URL) bool {
+	return url != nil && url.IsAbs()
 }
