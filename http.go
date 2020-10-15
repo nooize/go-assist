@@ -8,6 +8,11 @@ import (
 	"net/url"
 )
 
+const (
+	KeyRequestId  = "rid"
+	KeyCtx        = "ctx"
+)
+
 func HttpRequestBodyResolve(w http.ResponseWriter, r *http.Request, i interface{}) bool {
 	if err := json.NewDecoder(r.Body).Decode(i); err != nil {
 		SendJsonError(w, http.StatusBadRequest, "unable to parse request body: "+err.Error())
