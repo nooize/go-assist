@@ -2,6 +2,13 @@
 
 Series of helpers and structs for golang
 
+### Work with Structs
+-----------------------------------
+
+##### Map2Struct(m map[string]interface{}, s interface{}) error
+
+##### Struct2Map(s interface{}) map[string]interface{}
+
 ### Work with Strings
 -----------------------------------
 
@@ -12,10 +19,14 @@ Series of helpers and structs for golang
  
  _Example:_ java_script -> JavaScript
 
-##### CamelToSnakeCase(str string) string
+##### IsStringUrl(v string) bool
 
+##### RandomString(length int) string
+
+##### RandomNumberString(length int) string
 
 ### Work wit time.Time 
+-----------------------------------
 
 ##### IsTimeZero(t *time.Time)
  Check if time is equals to 00:00:00
@@ -24,4 +35,4 @@ Series of helpers and structs for golang
  Return new time.Time with time equals to start of the day : 00:00:00
  
 ##### EndOfTheDay(t *time.Time) *time.Time
- Return new time.Time with time equals end of the day : to 23:59:50
+ Return new time.Time with time equals end of the day : to 23:59:59
