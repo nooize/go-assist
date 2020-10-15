@@ -15,21 +15,21 @@ import (
 
 */
 
-type unitState struct {
+type UnitState struct {
 	Error error
 }
 
 type unitCreator func() *Unit
 
-type unitHandler struct {
-	Start func(chan *unitState)
-	Stop  func(chan *unitState)
+type UnitHandler struct {
+	Start func(chan *UnitState)
+	Stop  func(chan *UnitState)
 }
 
 type Unit struct {
 	lock      sync.Mutex
-	instance  *unitHandler
-	state     *unitState
+	instance  *UnitHandler
+	state     *UnitState
 	dependers []*Unit
 	after     []*Unit
 }
@@ -69,7 +69,7 @@ func (m *Unit) run() {
 		u.run()
 	}
 
-	stateChannel := make(chan *unitState)
+	stateChannel := make(chan *UnitState)
 	go m.instance.Start(stateChannel)
 	m.state = <-stateChannel
 	if m.state.Error != nil {
@@ -86,7 +86,7 @@ func (m *Unit) stop() {
 		return
 	}
 
-	stateChannel := make(chan *unitState)
+	stateChannel := make(chan *UnitState)
 	go m.instance.Stop(stateChannel)
 	m.state = <-stateChannel
 	if m.state.Error != nil {
@@ -99,8 +99,15 @@ func (m *Unit) stop() {
 
 }
 
-func NewUnit(i *unitHandler) *Unit {
+func HandlerToUnit(i *UnitHandler) *Unit {
 	return &Unit{
 		instance: i,
 	}
+}
+
+func NewUnit(start func(chan *UnitState), stop func(chan *UnitState)) *Unit {
+	return HandlerToUnit(&UnitHandler{
+		Start: start,
+		Stop:  stop,
+	})
 }

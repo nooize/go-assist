@@ -92,11 +92,11 @@ func NewService(name string) *Service {
 		Name: name,
 	}
 	s.Unit = *NewUnit(&unitHandler{
-		Start: func(state chan *unitState) {
+		Start: func(state chan *UnitState) {
 			err := s.run()
-			state <- &unitState{ Error: err }
+			state <- &UnitState{ Error: err }
 		},
-		Stop: func(state chan *unitState) {
+		Stop: func(state chan *UnitState) {
 			os.Exit(0)
 		},
 	})
