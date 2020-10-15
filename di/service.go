@@ -91,14 +91,14 @@ func NewService(name string) *Service {
 		shutdown: make(chan error, 2),
 		Name: name,
 	}
-	s.Unit = *NewUnit(&unitHandler{
-		Start: func(state chan *UnitState) {
+	s.Unit = *NewUnit(
+		func(state chan *UnitState) {
 			err := s.run()
 			state <- &UnitState{ Error: err }
 		},
-		Stop: func(state chan *UnitState) {
+		func(state chan *UnitState) {
 			os.Exit(0)
 		},
-	})
+	)
 	return &s
 }
