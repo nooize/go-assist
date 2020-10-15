@@ -1,4 +1,4 @@
-package assist
+package http
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ const (
 	KeyCtx        = "ctx"
 )
 
-func HttpRequestBodyResolve(w http.ResponseWriter, r *http.Request, i interface{}) bool {
+func BodyResolve(w http.ResponseWriter, r *http.Request, i interface{}) bool {
 	if err := json.NewDecoder(r.Body).Decode(i); err != nil {
 		SendJsonError(w, http.StatusBadRequest, "unable to parse request body: "+err.Error())
 		return false
@@ -21,7 +21,7 @@ func HttpRequestBodyResolve(w http.ResponseWriter, r *http.Request, i interface{
 	return true
 }
 
-func HttpRequestLanguage(r *http.Request) *language.Tag {
+func GetLanguage(r *http.Request) *language.Tag {
 	header := r.Header.Get("Accept-Language")
 	tags, _, _ := language.ParseAcceptLanguage(header)
 	if len(tags) > 0 {
@@ -30,7 +30,7 @@ func HttpRequestLanguage(r *http.Request) *language.Tag {
 	return nil
 }
 
-func HttpRequestIP(r *http.Request) net.IP {
+func GetIP(r *http.Request) net.IP {
 	ip := r.Header.Get("X-Real-Ip")
 	if ip == "" {
 		ip = r.Header.Get("X-Forwarded-For")
