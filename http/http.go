@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	KeyRequestId  = "rid"
-	KeyCtx        = "ctx"
+	RequestIDHeader = "X-Request-Id"
+	KeyRequestId    = "rid"
+	KeyCtx          = "ctx"
 )
 
 func BodyResolve(w http.ResponseWriter, r *http.Request, i interface{}) bool {
