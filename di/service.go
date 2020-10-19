@@ -37,7 +37,7 @@ func (s *Service) After(d *Unit) *Service {
 
 func (s *Service) run() error {
 
-	signal.Notify(s.quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGHUP, syscall.SIGQUIT)
+	signal.Notify(s.quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGQUIT)
 
 	log.Printf(s.Name + " is up.")
 	// logs.Logs().Info().Msgf("%v is up", core.ProductName)
@@ -50,6 +50,17 @@ func (s *Service) run() error {
 	_, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancelFunc()
 
+
+	<- s.quit
+		//logging.Info("* Service is shutting down.. *")
+		//telemetry.ServerStop()
+		//appstatus.Instance.Idle = true
+		//cancel()
+		//appconfig.Instance.Close()
+	time.Sleep(1 * time.Second)
+	os.Exit(0)
+
+/*
 	for {
 		select {
 		case sig := <- s.quit:
@@ -81,14 +92,14 @@ func (s *Service) run() error {
 	}
 
 	os.Exit(0)
-
+*/
 	return nil
 }
 
 func NewService(name string) *Service {
 	s := Service{
-		quit: make(chan os.Signal, 2),
-		shutdown: make(chan error, 2),
+		quit: make(chan os.Signal, 1),
+		shutdown: make(chan error, 1),
 		Name: name,
 	}
 	s.Unit = *NewUnit(
