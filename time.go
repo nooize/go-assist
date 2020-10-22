@@ -14,7 +14,9 @@ const JsonDateTimeFormat = JsonDateFormat + "T" + JsonTimeFormat
 
 
 // spetial type for universal json parse unix time stamp or time string
-type JsonTime time.Time
+type JsonTime struct {
+	time.Time
+}
 
 // UnmarshalJSON implements the json.Unmarshaler interface.
 func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
@@ -29,7 +31,7 @@ func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
 	case 13:
 		i, err := strconv.ParseInt(str, 10, 64)
 		if err == nil {
-			*t = JsonTime(time.Unix(0, i*int64(time.Millisecond)))
+			*t = JsonTime{time.Unix(0, i*int64(time.Millisecond))}
 		}
 		return err
 	case len(JsonDateFormat):
@@ -47,14 +49,14 @@ func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
 	}
 	nt, err := time.Parse(fmt, str)
 	if err == nil {
-		*t = JsonTime(nt)
+		*t = JsonTime{nt}
 	}
 	return err
 }
 
 // MarshalJSON implements the json.Marshaler interface.
 func (t  JsonTime) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%s\"", time.Time(t).Format(time.RFC3339))), nil
+	return []byte(fmt.Sprintf("\"%s\"", t.Time.Format(time.RFC3339))), nil
 }
 
 func IsTimeZero(t *time.Time) bool {
@@ -78,7 +80,7 @@ func ParseFromTo(fromStr string, toStr string) (from time.Time, to time.Time, er
 	if err = tmp.UnmarshalJSON([]byte(fromStr)); err != nil {
 		return
 	}
-	from = time.Time(tmp)
+	from = tmp.Time
 	if len(toStr) == 0 {
 		from = StartOfTheDay(from)
 		to = EndOfTheDay(from)
@@ -87,7 +89,7 @@ func ParseFromTo(fromStr string, toStr string) (from time.Time, to time.Time, er
 		if err = tmp.UnmarshalJSON([]byte(toStr)); err != nil {
 			return
 		}
-		to = time.Time(tmp)
+		to = tmp.Time
 	}
 	if from.After(to) {
 		err = errors.New("to date must be after from")
