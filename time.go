@@ -72,7 +72,9 @@ func EndOfTheDay(t time.Time) time.Time {
 }
 
 func IsSameDay(d1 time.Time, d2 time.Time) bool {
-	return d1.Year() == d2.Year() && d1.YearDay() == d1.YearDay()
+	vd1 := d1.UTC()
+	vd2 := d2.UTC()
+	return vd1.Year() == vd2.Year() && vd1.YearDay() == vd2.YearDay()
 }
 
 func ParseFromTo(fromStr string, toStr string) (from time.Time, to time.Time, err error) {
