@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type APICursor struct {
@@ -64,6 +65,8 @@ func ResolveCursor(r *http.Request, defSize int, defSort string) *APICursor {
 	v, err := strconv.Atoi(sv)
 	if err == nil && v > 0 {
 		c.Size = v
+	} else {
+		c.Size = defSize
 	}
 	sv = r.URL.Query().Get("offset")
 	if len(sv) == 0 {
@@ -73,9 +76,12 @@ func ResolveCursor(r *http.Request, defSize int, defSort string) *APICursor {
 	if err == nil && v > 0 {
 		c.From = v
 	}
-	sr := r.URL.Query().Get("sort")
+	sr := strings.TrimSpace(r.URL.Query().Get("sort"))
 	if len(sr) == 0 {
-		sr = r.Header.Get("X-Sort-By")
+		sr = strings.TrimSpace(r.Header.Get("X-Sort-By"))
+	}
+	if len(sr) == 0 {
+		sr = strings.TrimSpace(defSort)
 	}
 	if len(sr) > 0 {
 		if sr[0] == '+' ||  sr[0] == '-' {
