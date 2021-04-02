@@ -1,6 +1,8 @@
 package env
 
 import (
+	"log"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -12,6 +14,19 @@ func GetStr(key string, def string) string {
 		return v
 	}
 	return def
+}
+
+func GetUrl(key string) *url.URL {
+	v := getEnv(key)
+	if len(v) > 0 {
+		return nil
+	}
+	url, err := url.Parse(v)
+	if err != nil {
+		log.Printf("bad url (%s) in env key %s", v, key)
+		return nil
+	}
+	return url
 }
 
 func GetInt(key string, def int) int {
@@ -38,5 +53,5 @@ func GetDuration(key string, def time.Duration) time.Duration {
 }
 
 func getEnv(key string) string {
-	return strings.TrimSpace(os.Getenv(key));
+	return strings.TrimSpace(os.Getenv(key))
 }
