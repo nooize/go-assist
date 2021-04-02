@@ -16,10 +16,10 @@ func GetStr(key string, def string) string {
 	return def
 }
 
-func GetUrl(key string) *url.URL {
+func GetUrl(key string, def string) *url.URL {
 	v := getEnv(key)
-	if len(v) > 0 {
-		return nil
+	if len(v) == 0 {
+		v = def
 	}
 	url, err := url.Parse(v)
 	if err != nil {
