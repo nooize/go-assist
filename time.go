@@ -100,6 +100,9 @@ func ParseFromTo(fromStr string, toStr string) (from time.Time, to time.Time, er
 		err = errors.New("to date must be after from")
 		return
 	}
+	if IsSameDay(from, to) && IsTimeZero(&to) {
+		to = EndOfTheDay(to)
+	}
 	return
 }
 
