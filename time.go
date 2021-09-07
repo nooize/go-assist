@@ -25,24 +25,27 @@ func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
 	}
 	str := strings.Trim(string(bytes), "\"")
 	fmt := ""
-	switch len(str) {
-	case 0:
+	strLen := len(str)
+	switch {
+	case strLen == 0:
 		return nil
-	case 13:
+	case strLen == 13:
 		i, err := strconv.ParseInt(str, 10, 64)
 		if err == nil {
 			*t = JsonTime{time.Unix(0, i*int64(time.Millisecond))}
 		}
 		return err
-	case len(JsonDateFormat):
+	case strLen > 7 && strLen < 11:
+		fmt = "2006-1-2"
+	case strLen == len(JsonDateFormat):
 		str += "T00:00:00" + time.Now().Format("Z07:00")
 		fmt = time.RFC3339
-	case len(JsonDateTimeFormat):
+	case strLen == len(JsonDateTimeFormat):
 		str = str[:10] + "T" + str[11:] + time.Now().Format("Z07:00")
 		fmt = time.RFC3339
-	case len(time.RFC3339):
+	case strLen == len(time.RFC3339):
 		fmt = time.RFC3339
-	case len(time.RFC3339Nano):
+	case strLen == len(time.RFC3339Nano):
 		fmt = time.RFC3339Nano
 	default:
 		return errors.New("time must be in RFC3339 or timestamp format")
