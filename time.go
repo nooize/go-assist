@@ -97,7 +97,7 @@ func WeekPeriod(t time.Time) (time.Time, time.Time) {
 
 func MonthPeriod(t time.Time) (time.Time, time.Time) {
 	year, month, _ := t.Date()
-	from := time.Date(year, month-1, 1, 0, 0, 0, 0, t.Location())
+	from := time.Date(year, month, 1, 0, 0, 0, 0, t.Location())
 	to := from.AddDate(0, 1, 0).Add(-time.Nanosecond)
 	return from, to
 }
