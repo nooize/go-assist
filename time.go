@@ -12,7 +12,6 @@ const JsonDateFormat = "2006-01-02"
 const JsonTimeFormat = "15:04:05" // "2006-01-02T15:04:05.999Z"
 const JsonDateTimeFormat = JsonDateFormat + "T" + JsonTimeFormat
 
-
 // spetial type for universal json parse unix time stamp or time string
 type JsonTime struct {
 	time.Time
@@ -59,7 +58,7 @@ func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
 }
 
 // MarshalJSON implements the json.Marshaler interface.
-func (t  JsonTime) MarshalJSON() ([]byte, error) {
+func (t JsonTime) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("\"%s\"", t.Time.Format(time.RFC3339))), nil
 }
 
@@ -79,6 +78,28 @@ func IsSameDay(d1 time.Time, d2 time.Time) bool {
 	vd1 := d1.UTC()
 	vd2 := d2.UTC()
 	return vd1.Year() == vd2.Year() && vd1.YearDay() == vd2.YearDay()
+}
+
+func DayPeriod(t time.Time) (time.Time, time.Time) {
+	return StartOfTheDay(t), EndOfTheDay(t)
+}
+
+func WeekPeriod(t time.Time) (time.Time, time.Time) {
+	year, month, day := t.Date()
+	weekDay := t.Weekday() - 1
+	if weekDay < 0 {
+		weekDay = 6
+	}
+	from := time.Date(year, month, day-int(weekDay), 0, 0, 0, 0, t.Location())
+	to := from.AddDate(0, 0, 7).Add(-time.Nanosecond)
+	return from, to
+}
+
+func MonthPeriod(t time.Time) (time.Time, time.Time) {
+	year, month, _ := t.Date()
+	from := time.Date(year, month-1, 1, 0, 0, 0, 0, t.Location())
+	to := from.AddDate(0, 1, 0).Add(-time.Nanosecond)
+	return from, to
 }
 
 func ParseFromTo(fromStr string, toStr string) (from time.Time, to time.Time, err error) {
@@ -103,5 +124,3 @@ func ParseFromTo(fromStr string, toStr string) (from time.Time, to time.Time, er
 	}
 	return
 }
-
-
