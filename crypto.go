@@ -5,11 +5,40 @@ import (
 	"crypto/ecdsa"
 	"crypto/ed25519"
 	"crypto/rsa"
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"golang.org/x/crypto/ssh"
 )
+
+func ParseCertificate(bytes []byte) (*tls.Certificate, error) {
+	var cert tls.Certificate
+	pool := append(make([]byte, 0), bytes...)
+	for {
+		block, rest := pem.Decode(pool)
+		if block == nil {
+			break
+		}
+		if block.Type == "CERTIFICATE" {
+			cert.Certificate = append(cert.Certificate, block.Bytes)
+		} else {
+			if pKey, err := ParseX509PrivateKey(block.Bytes); err != nil {
+				return nil, fmt.Errorf("fail to parse private key : %s", err.Error())
+			} else {
+				cert.PrivateKey = pKey
+			}
+		}
+		pool = rest
+	}
+	if len(cert.Certificate) == 0 {
+		return nil, fmt.Errorf("no certificate found")
+	} else if cert.PrivateKey == nil {
+		return nil, fmt.Errorf("no private key found")
+	}
+	return &cert, nil
+}
 
 func ParseX509PrivateKey(pem []byte) (crypto.PrivateKey, error) {
 	//pem = []byte(strings.Replace(string(pem), "\n", "", -1))
