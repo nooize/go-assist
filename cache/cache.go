@@ -55,6 +55,18 @@ func (c *cache) Set(k string, x interface{}, dur time.Duration) {
 	c.mu.Unlock()
 }
 
+// Remove an item from the cache.
+// Returns the item or nil,
+// and a bool indicating if the key was found and deleted.
+func (c *cache) Remove(k string) (interface{}, bool) {
+	c.mu.RLock()
+	o, ok := c.items[k]
+	if ok {
+		c.delete(k)
+	}
+	return o, ok
+}
+
 // Get an item from the cache.
 // Returns the item or nil,
 // and a bool indicating if the key was found.
