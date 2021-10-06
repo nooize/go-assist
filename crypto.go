@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func ParseCertificate(bytes []byte) (*tls.Certificate, error) {
+func ParsePemCertificate(bytes []byte) (*tls.Certificate, error) {
 	var cert tls.Certificate
 	pool := append(make([]byte, 0), bytes...)
 	for {
