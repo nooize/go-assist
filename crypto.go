@@ -11,7 +11,16 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/crypto/ssh"
+	"os"
 )
+
+func LoadPemCertificate(file string) (*tls.Certificate, error) {
+	certPEMBlock, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePemCertificate(certPEMBlock)
+}
 
 func ParsePemCertificate(bytes []byte) (*tls.Certificate, error) {
 	var cert tls.Certificate
