@@ -18,7 +18,7 @@ func GetStr(key string, def string) string {
 
 func GetUrl(key string, def string) *url.URL {
 	v := getEnv(key)
-	if len(v) == 0 {
+	if v == "" {
 		v = def
 	}
 	url, err := url.Parse(v)

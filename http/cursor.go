@@ -16,7 +16,7 @@ type APICursor struct {
 }
 
 func (cur *APICursor) Sql(prefix string) string {
-	if len(cur.OrderBy) == 0 {
+	if cur.OrderBy == "" {
 		return ""
 	}
 	sql := "ORDER BY " + prefix + cur.OrderBy
@@ -29,7 +29,7 @@ func (cur *APICursor) Sql(prefix string) string {
 }
 
 func (cur *APICursor) SqlOrderBy(prefix string) string {
-	if len(cur.OrderBy) == 0 {
+	if cur.OrderBy == "" {
 		return ""
 	}
 	sql := prefix + cur.OrderBy
@@ -59,7 +59,7 @@ func ResolveCursor(r *http.Request, defSize int, defSort string) *APICursor {
 		OrderReverse: false,
 	}
 	sv := r.URL.Query().Get("limit")
-	if len(sv) == 0 {
+	if sv == "" {
 		sv = r.Header.Get("X-Page-Limit")
 	}
 	v, err := strconv.Atoi(sv)
@@ -69,7 +69,7 @@ func ResolveCursor(r *http.Request, defSize int, defSort string) *APICursor {
 		c.Size = defSize
 	}
 	sv = r.URL.Query().Get("offset")
-	if len(sv) == 0 {
+	if sv == "" {
 		sv = r.Header.Get("X-Page-Offset")
 	}
 	v, err = strconv.Atoi(sv)
@@ -77,10 +77,10 @@ func ResolveCursor(r *http.Request, defSize int, defSort string) *APICursor {
 		c.From = v
 	}
 	sr := strings.TrimSpace(r.URL.Query().Get("sort"))
-	if len(sr) == 0 {
+	if sr == "" {
 		sr = strings.TrimSpace(r.Header.Get("X-Sort-By"))
 	}
-	if len(sr) == 0 {
+	if sr == "" {
 		sr = strings.TrimSpace(defSort)
 	}
 	if len(sr) > 0 {
