@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-func GetStr(key string, def string) string {
+func GetStr(key, def string) string {
 	if v := getEnv(key); len(v) > 0 {
 		return v
 	}
 	return def
 }
 
-func GetUrl(key string, def string) *url.URL {
+func GetUrl(key, def string) *url.URL {
 	v := getEnv(key)
 	if v == "" {
 		v = def

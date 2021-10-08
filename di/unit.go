@@ -105,7 +105,7 @@ func HandlerToUnit(i *UnitHandler) *Unit {
 	}
 }
 
-func NewUnit(start func(chan *UnitState), stop func(chan *UnitState)) *Unit {
+func NewUnit(start, stop func(chan *UnitState)) *Unit {
 	return HandlerToUnit(&UnitHandler{
 		Start: start,
 		Stop:  stop,

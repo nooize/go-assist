@@ -74,7 +74,7 @@ func EndOfTheDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 999999999, t.Location())
 }
 
-func IsSameDay(d1 time.Time, d2 time.Time) bool {
+func IsSameDay(d1, d2 time.Time) bool {
 	vd1 := d1.UTC()
 	vd2 := d2.UTC()
 	return vd1.Year() == vd2.Year() && vd1.YearDay() == vd2.YearDay()
@@ -102,7 +102,7 @@ func MonthPeriod(t time.Time) (time.Time, time.Time) {
 	return from, to
 }
 
-func ParseFromTo(fromStr string, toStr string) (from time.Time, to time.Time, err error) {
+func ParseFromTo(fromStr, toStr string) (from, to time.Time, err error) {
 	tmp := JsonTime{}
 	if err = tmp.UnmarshalJSON([]byte(fromStr)); err != nil {
 		return
