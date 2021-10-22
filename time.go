@@ -75,9 +75,8 @@ func EndOfTheDay(t time.Time) time.Time {
 }
 
 func IsSameDay(d1, d2 time.Time) bool {
-	vd1 := d1.UTC()
-	vd2 := d2.UTC()
-	return vd1.Year() == vd2.Year() && vd1.YearDay() == vd2.YearDay()
+	ld2 := d2.In(d1.Location())
+	return d1.Year() == ld2.Year() && d1.YearDay() == ld2.YearDay()
 }
 
 func DayPeriod(t time.Time) (time.Time, time.Time) {
