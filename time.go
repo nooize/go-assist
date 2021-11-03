@@ -35,13 +35,13 @@ func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
 		}
 		return err
 	case strLen > 7 && strLen < 10:
-		str += "T00:00:00" + time.Now().Format("Z07:00")
+		str += "T00:00:00Z"
 		fmt = "2006-1-2T15:04:05Z07:00"
 	case strLen == len(JsonDateFormat):
-		str += "T00:00:00" + time.Now().Format("Z07:00")
+		str += "T00:00:00Z"
 		fmt = time.RFC3339
 	case strLen == len(JsonDateTimeFormat):
-		str = str[:10] + "T" + str[11:] + time.Now().Format("Z07:00")
+		str = str[:10] + "T" + str[11:] + "Z"
 		fmt = time.RFC3339
 	case strLen == len(time.RFC3339):
 		fmt = time.RFC3339
