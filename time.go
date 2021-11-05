@@ -11,6 +11,8 @@ import (
 const JsonDateFormat = "2006-01-02"
 const JsonTimeFormat = "15:04:05" // "2006-01-02T15:04:05.999Z"
 const JsonDateTimeFormat = JsonDateFormat + "T" + JsonTimeFormat
+const JsonDateTimeWithZoneFormat = JsonDateTimeFormat + " MST"
+const jsonDateWithZoneFormat = JsonDateFormat + " MST"
 
 // spetial type for universal json parse unix time stamp or time string
 type JsonTime struct {
@@ -35,13 +37,27 @@ func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
 		}
 		return err
 	case strLen > 7 && strLen < 10:
-		str += "T00:00:00Z"
+		offset, err := dateOffset(str)
+		if err != nil {
+			return err
+		}
+		str += "T00:00:00" + offset
 		fmt = "2006-1-2T15:04:05Z07:00"
 	case strLen == len(JsonDateFormat):
-		str += "T00:00:00Z"
+		// detect time offset depend from date
+		// same locations change offset during the year
+		offset, err := dateOffset(str)
+		if err != nil {
+			return err
+		}
+		str += "T00:00:00" + offset
 		fmt = time.RFC3339
 	case strLen == len(JsonDateTimeFormat):
-		str = str[:10] + "T" + str[11:] + "Z"
+		offset, err := dateOffset(str[:10])
+		if err != nil {
+			return err
+		}
+		str = str[:10] + "T" + str[11:] + " " + offset
 		fmt = time.RFC3339
 	case strLen == len(time.RFC3339):
 		fmt = time.RFC3339
@@ -122,4 +138,15 @@ func ParseFromTo(fromStr, toStr string) (from, to time.Time, err error) {
 		return
 	}
 	return
+}
+// this func return time offset for date
+// same location may change time zone depends
+// from time of the year
+func dateOffset(date string) (string, error) {
+	zone, _ := time.Now().Zone()
+	d, err := time.Parse(jsonDateWithZoneFormat, date + " " + zone)
+	if err != nil {
+		return "", err
+	}
+	return d.Format("Z07:00"), nil
 }
