@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"golang.org/x/text/language"
 	"net"
-	"net/http"
+	sysHttp "net/http"
 	"net/url"
 )
 
@@ -14,15 +14,15 @@ const (
 	KeyCtx          = "ctx"
 )
 
-func BodyResolve(w http.ResponseWriter, r *http.Request, i interface{}) bool {
+func BodyResolve(w sysHttp.ResponseWriter, r *sysHttp.Request, i interface{}) bool {
 	if err := json.NewDecoder(r.Body).Decode(i); err != nil {
-		SendJsonError(w, http.StatusBadRequest, "unable to parse request body: "+err.Error())
+		SendJsonError(w, sysHttp.StatusBadRequest, "unable to parse request body: "+err.Error())
 		return false
 	}
 	return true
 }
 
-func GetLanguage(r *http.Request) *language.Tag {
+func GetLanguage(r *sysHttp.Request) *language.Tag {
 	header := r.Header.Get("Accept-Language")
 	tags, _, _ := language.ParseAcceptLanguage(header)
 	if len(tags) > 0 {
@@ -31,7 +31,7 @@ func GetLanguage(r *http.Request) *language.Tag {
 	return nil
 }
 
-func GetIP(r *http.Request) net.IP {
+func GetIP(r *sysHttp.Request) net.IP {
 	ip := r.Header.Get("X-Real-Ip")
 	if ip == "" {
 		ip = r.Header.Get("X-Forwarded-For")
