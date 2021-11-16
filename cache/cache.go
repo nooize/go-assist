@@ -16,15 +16,16 @@ type Cache struct {
 }
 
 type item struct {
-	Object interface{}
-	Expire int64
+	Object   interface{}
+	added    time.Time
+	duration time.Duration
 }
 
 func (item item) Expired() bool {
-	if item.Expire == 0 {
+	if item.duration < 0 {
 		return false
 	}
-	return time.Now().UnixNano() > item.Expire
+	return time.Now().Sub(item.added) > item.duration
 }
 
 type cache struct {
@@ -37,33 +38,56 @@ type cache struct {
 
 // Add an item to the cache, replacing any existing item.
 // If the duration is 0 (DefaultExpiration), the cache's default expiration time is used.
-// If it is -1 (NoExpiration), the item never expires.
+// If it is -1 (NoExpire), the item never expires.
 func (c *cache) Set(k string, x interface{}, dur time.Duration) {
-	exp := time.Now()
+	if x == nil {
+		return
+	}
+	it := item{
+		Object:   x,
+		added:    time.Now(),
+		duration: NoExpire,
+	}
 	if dur == DefaultExpire {
-		exp = exp.Add(c.config.Expire)
+		it.duration = c.config.Expire
 	} else if dur > 0 {
-		exp = exp.Add(dur)
+		it.duration = dur
 	}
 	c.mu.Lock()
-	c.items[k] = item{
-		Object: x,
-		Expire: exp.UnixNano(),
-	}
+	c.items[k] = it
 	// Calls to mu.Unlock are currently not deferred because defer
 	// adds ~200 ns (as of go1.)
 	c.mu.Unlock()
 }
 
-// Remove an item from the cache.
-// Returns the item or nil,
-// and a bool indicating if the key was found and deleted.
-func (c *cache) Remove(k string) (interface{}, bool) {
-	c.mu.RLock()
-	o, ok := c.items[k]
-	if ok {
-		c.delete(k)
+// if item exist in cache cache, replacing any existing item.
+// If the duration is 0 (DefaultExpiration), the cache's default expiration time is used.
+// If it is -1 (NoExpiration), the item never expires.
+func (c *cache) Touch(key string, dur time.Duration) (touched bool) {
+	c.mu.Lock()
+	if item, ok := c.items[key]; ok {
+		item.added = time.Now()
+		if dur == DefaultExpire {
+			item.duration = c.config.Expire
+		} else if dur > 0 {
+			item.duration = dur
+		}
+		c.items[key] = item
+		touched = true
 	}
+	c.mu.Unlock()
+	return
+}
+
+// Remove an item from the cache.
+// Returns the item or nil,// and a bool indicating if the key was found and deleted.
+func (c *cache) Remove(key string) (interface{}, bool) {
+	c.mu.Lock()
+	o, ok := c.items[key]
+	if ok {
+		delete(c.items, key)
+	}
+	c.mu.Unlock()
 	return o, ok
 }
 
@@ -72,17 +96,11 @@ func (c *cache) Remove(k string) (interface{}, bool) {
 // and a bool indicating if the key was found.
 func (c *cache) Get(k string) (interface{}, bool) {
 	c.mu.RLock()
-	// "Inlining" of get and Expired
 	item, ok := c.items[k]
-	if !ok {
-		c.mu.RUnlock()
-		return nil, false
-	}
-	if item.Expired() {
-		c.mu.RUnlock()
-		return nil, false
-	}
 	c.mu.RUnlock()
+	if !ok || item.Expired() {
+		return nil, false
+	}
 	return item.Object, true
 }
 
@@ -104,20 +122,21 @@ func (c *cache) Flush() {
 
 func (c *cache) FlushExpired() {
 	expiredItems := make(map[string]interface{})
-	now := time.Now().UnixNano()
-	c.mu.Lock()
-	for k, v := range c.items {
-		if v.Expire > 0 && now > v.Expire {
-			ov, evicted := c.delete(k)
-			if evicted {
-				expiredItems[k] = ov
-			}
+	c.mu.RLock()
+	for key, item := range c.items {
+		if item.Expired() {
+			expiredItems[key] = item.Object
 		}
 	}
-	c.mu.Unlock()
-	for k, v := range expiredItems {
-		c.onExpire(k, v)
-	}
+	c.mu.RUnlock()
+	go func(removed map[string]interface{}) {
+		for key, obj := range removed {
+			c.Remove(key)
+			if c.onExpire != nil {
+				go c.onExpire(key, obj)
+			}
+		}
+	}(expiredItems)
 }
 
 // Sets an (optional) function that is called with the key and value when an
@@ -126,11 +145,6 @@ func (c *cache) OnExpire(f func(string, interface{})) {
 	c.mu.Lock()
 	c.onExpire = f
 	c.mu.Unlock()
-}
-
-func (c *cache) delete(k string) (interface{}, bool) {
-	delete(c.items, k)
-	return nil, false
 }
 
 type gc struct {
