@@ -31,7 +31,15 @@ func GetLanguage(r *sysHttp.Request) *language.Tag {
 	return nil
 }
 
-func GetIP(r *sysHttp.Request) net.IP {
+func GetReference(r *sysHttp.Request) *url.URL {
+	u, err := url.Parse(r.Header.Get("Referer"))
+	if err != nil {
+		return nil
+	}
+	return u
+}
+
+func GetIp(r *sysHttp.Request) net.IP {
 	ip := r.Header.Get("X-Real-Ip")
 	if ip == "" {
 		ip = r.Header.Get("X-Forwarded-For")

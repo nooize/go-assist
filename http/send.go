@@ -44,16 +44,12 @@ func SendJsonError(w http.ResponseWriter, status int, msg string) {
 
 func SendJson(w http.ResponseWriter, data interface{}, code ...int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	msg, err := json.Marshal(data)
-	if err != nil {
-		log.Printf(" JSON encode error : %v", err.Error())
-	}
 	if len(code) > 0 {
 		w.WriteHeader(code[0])
 	} else {
 		w.WriteHeader(http.StatusOK)
 	}
-	if _, err := w.Write(msg); err != nil {
-		log.Printf(" write error : %v", err.Error())
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		log.Printf("write JSON error : %v", err.Error())
 	}
 }
