@@ -31,7 +31,7 @@ func GetLanguage(r *sysHttp.Request) *language.Tag {
 	return nil
 }
 
-func GetReference(r *sysHttp.Request) *url.URL {
+func GetReferer(r *sysHttp.Request) *url.URL {
 	u, err := url.Parse(r.Header.Get("Referer"))
 	if err != nil {
 		return nil
