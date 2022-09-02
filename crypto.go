@@ -22,6 +22,17 @@ func LoadPemCertificate(file string) (*tls.Certificate, error) {
 	return ParsePemCertificate(certPEMBlock)
 }
 
+func ParsePemCertificateWithPrivateKey(bytes []byte) (*tls.Certificate, error) {
+	cert, err := ParsePemCertificate(bytes)
+	if err == nil && cert.PrivateKey == nil {
+		err = fmt.Errorf("no private key found")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return cert, nil
+}
+
 func ParsePemCertificate(bytes []byte) (*tls.Certificate, error) {
 	var cert tls.Certificate
 	pool := append(make([]byte, 0), bytes...)
@@ -43,8 +54,6 @@ func ParsePemCertificate(bytes []byte) (*tls.Certificate, error) {
 	}
 	if len(cert.Certificate) == 0 {
 		return nil, fmt.Errorf("no certificate found")
-	} else if cert.PrivateKey == nil {
-		return nil, fmt.Errorf("no private key found")
 	}
 	return &cert, nil
 }
