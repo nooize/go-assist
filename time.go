@@ -78,16 +78,28 @@ func (t JsonTime) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("\"%s\"", t.Time.Format(time.RFC3339))), nil
 }
 
+// IsTimeZero check if tiem is 00:00:00
 func IsTimeZero(t *time.Time) bool {
 	return t != nil && t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0
 }
 
+// StartOfTheDay return new time.Time with 00:00:00 time
 func StartOfTheDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 }
 
+// EndOfTheDay return new time.Time with 23.59.59.999999999 time
 func EndOfTheDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 999999999, t.Location())
+}
+
+func TrimToMilliseconds(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond()/1000000000*1000000000, t.Location())
+}
+
+// TrimToMicroseconds trim time to microseconds
+func TrimToMicroseconds(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second(), t.Nanosecond()/1000000*1000000, t.Location())
 }
 
 func IsSameDay(d1, d2 time.Time) bool {
@@ -139,12 +151,13 @@ func ParseFromTo(fromStr, toStr string) (from, to time.Time, err error) {
 	}
 	return
 }
+
 // this func return time offset for date
 // same location may change time zone depends
 // from time of the year
 func dateOffset(date string) (string, error) {
 	zone, _ := time.Now().Zone()
-	d, err := time.Parse(jsonDateWithZoneFormat, date + " " + zone)
+	d, err := time.Parse(jsonDateWithZoneFormat, date+" "+zone)
 	if err != nil {
 		return "", err
 	}
