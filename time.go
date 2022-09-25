@@ -21,10 +21,10 @@ type JsonTime struct {
 
 // UnmarshalJSON implements the json.Unmarshaler interface.
 func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
+	str := strings.Trim(string(bytes), "\"")
 	if string(bytes) == "null" {
 		return nil
 	}
-	str := strings.Trim(string(bytes), "\"")
 	fmt := ""
 	strLen := len(str)
 	switch {
