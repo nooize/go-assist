@@ -14,7 +14,6 @@ const JsonDateTimeFormat = JsonDateFormat + "T" + JsonTimeFormat
 const JsonDateTimeWithZoneFormat = JsonDateTimeFormat + " MST"
 const jsonDateWithZoneFormat = JsonDateFormat + " MST"
 
-// spetial type for universal json parse unix time stamp or time string
 type JsonTime struct {
 	time.Time
 }
@@ -25,12 +24,13 @@ func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
 	if str == "null" {
 		return nil
 	}
-	fmt := ""
+	timeFormat := time.RFC3339
 	strLen := len(str)
 	switch {
 	case strLen == 0:
 		return nil
 	case strLen == 13:
+		// unix timestamp
 		i, err := strconv.ParseInt(str, 10, 64)
 		if err == nil {
 			*t = JsonTime{time.Unix(0, i*int64(time.Millisecond))}
@@ -42,7 +42,7 @@ func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
 			return err
 		}
 		str += "T00:00:00" + offset
-		fmt = "2006-1-2T15:04:05Z07:00"
+		timeFormat = "2006-1-2T15:04:05Z07:00"
 	case strLen == len(JsonDateFormat):
 		// detect time offset depend from date
 		// same locations change offset during the year
@@ -51,26 +51,22 @@ func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
 			return err
 		}
 		str += "T00:00:00" + offset
-		fmt = time.RFC3339
 	case strLen == len(JsonDateTimeFormat):
 		offset, err := dateOffset(str[:10])
 		if err != nil {
 			return err
 		}
 		str = str[:10] + "T" + str[11:] + " " + offset
-		fmt = time.RFC3339
-	case strLen == len(time.RFC3339):
-		fmt = time.RFC3339
 	case strLen == len(time.RFC3339Nano):
-		fmt = time.RFC3339Nano
+		timeFormat = time.RFC3339Nano
 	default:
-		return errors.New("time must be in RFC3339 or timestamp format")
+		// for all other cases we will try RFC 3339
 	}
-	nt, err := time.Parse(fmt, str)
+	nt, err := time.Parse(timeFormat, str)
 	if err == nil {
 		*t = JsonTime{nt}
 	}
-	return err
+	return errors.New("expect time in RFC3339 or timestamp, has: " + str)
 }
 
 // MarshalJSON implements the json.Marshaler interface.
