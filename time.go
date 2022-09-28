@@ -63,10 +63,11 @@ func (t *JsonTime) UnmarshalJSON(bytes []byte) error {
 		// for all other cases we will try RFC 3339
 	}
 	nt, err := time.Parse(timeFormat, str)
-	if err == nil {
-		*t = JsonTime{nt}
+	if err != nil {
+		return errors.New("expect time in RFC3339 or timestamp, has: " + str)
 	}
-	return errors.New("expect time in RFC3339 or timestamp, has: " + str)
+	*t = JsonTime{nt}
+	return nil
 }
 
 // MarshalJSON implements the json.Marshaler interface.
