@@ -85,9 +85,29 @@ func StartOfTheDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 }
 
+// StartOfTheHour return new time.Time with *.59.59.999999999 time
+func StartOfTheHour(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, t.Location())
+}
+
+// StartOfTheMinute return new time.Time with *.*.59.999999999 time
+func StartOfTheMinute(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), 0, 0, t.Location())
+}
+
 // EndOfTheDay return new time.Time with 23.59.59.999999999 time
 func EndOfTheDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, 999999999, t.Location())
+}
+
+// EndOfTheHour return new time.Time with 23.59.59.999999999 time
+func EndOfTheHour(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 59, 59, 999999999, t.Location())
+}
+
+// EndOfTheMinute return new time.Time with 23.59.59.999999999 time
+func EndOfTheMinute(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), 59, 999999999, t.Location())
 }
 
 func TrimToMilliseconds(t time.Time) time.Time {
@@ -102,6 +122,14 @@ func TrimToMicroseconds(t time.Time) time.Time {
 func IsSameDay(d1, d2 time.Time) bool {
 	ld2 := d2.In(d1.Location())
 	return d1.Year() == ld2.Year() && d1.YearDay() == ld2.YearDay()
+}
+
+func MinutePeriod(t time.Time) (time.Time, time.Time) {
+	return StartOfTheMinute(t), EndOfTheMinute(t)
+}
+
+func HourPeriod(t time.Time) (time.Time, time.Time) {
+	return StartOfTheHour(t), EndOfTheHour(t)
 }
 
 func DayPeriod(t time.Time) (time.Time, time.Time) {
